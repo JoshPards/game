@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -50,12 +50,15 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #FFD700;
+            background-color: #F5F5DC; /* Parchment color */
+            color: #000;
             padding: 20px;
             border-radius: 10px;
             text-align: center;
             font-size: 1.5em;
+            border: 5px solid #8B4513; /* Brown border */
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            font-family: 'Times New Roman', serif;
         }
         #restart {
             display: none;
@@ -105,6 +108,17 @@
     <p id="instructions">Embark on a magical journey! Each stage is a unique challenge – mazes, riddles, equations, and puzzles await. Solve them to unlock letters of my message. Use arrow keys to move, press E near pillars or to interact in puzzles!</p>
     <div class="game-container">
         <canvas id="gameCanvas" width="320" height="320"></canvas>
+        <div id="fourPicsOneWord" style="display:none; margin-top: 20px; text-align: center;">
+            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;">
+                <img src="https://i.imgur.com/1.png" alt="Pic 1" width="70" height="70" style="border-radius: 10px; box-shadow: 0 0 10px #FFD700;">
+                <img src="https://i.imgur.com/2.png" alt="Pic 2" width="70" height="70" style="border-radius: 10px; box-shadow: 0 0 10px #FFD700;">
+                <img src="https://i.imgur.com/3.png" alt="Pic 3" width="70" height="70" style="border-radius: 10px; box-shadow: 0 0 10px #FFD700;">
+                <img src="https://i.imgur.com/4Oq3Xqv.png" alt="Pic 4" width="70" height="70" style="border-radius: 10px; box-shadow: 0 0 10px #FFD700;">
+            </div>
+            <input type="text" id="fourPicsAnswer" placeholder="Enter your answer here" style="font-size: 1.2em; padding: 5px; width: 250px; border-radius: 5px; border: 2px solid #FFD700; text-align: center;">
+            <br>
+            <button id="fourPicsSubmit" style="margin-top: 10px; padding: 8px 20px; font-size: 1.1em; background-color: #228B22; color: white; border: none; border-radius: 5px; cursor: pointer;">Submit</button>
+        </div>
     </div>
     <p id="status">Stage: 1/4 | Collected: 0/3 | Lives: 3 | Unlocked Message: _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</p>
     <button id="restart" onclick="restartGame()">Restart Game</button>
@@ -118,21 +132,46 @@
 
 
 
+
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const status = document.getElementById('status');
-        const message = document.getElementById('message');
+        let message = document.getElementById('message');
+        if (!message) {
+            message = document.createElement('div');
+            message.id = 'message';
+            message.style.display = 'none';
+            message.style.position = 'absolute';
+            message.style.top = '50%';
+            message.style.left = '50%';
+            message.style.transform = 'translate(-50%, -50%)';
+            message.style.backgroundColor = '#F5F5DC';
+            message.style.color = '#000';
+            message.style.padding = '20px';
+            message.style.borderRadius = '10px';
+            message.style.textAlign = 'center';
+            message.style.fontSize = '1.5em';
+            message.style.border = '5px solid #8B4513';
+            message.style.boxShadow = '0 0 20px rgba(0,0,0,0.5)';
+            message.style.fontFamily = "'Times New Roman', serif";
+            document.body.appendChild(message);
+        }
         const restartBtn = document.getElementById('restart');
         const riddleDiv = document.getElementById('riddle');
         const riddleText = document.getElementById('riddleText');
         const riddleInput = document.getElementById('riddleInput');
         const answeredBtn = document.getElementById('answered');
 
+        const fourPicsDiv = document.getElementById('fourPicsOneWord');
+        const fourPicsAnswerInput = document.getElementById('fourPicsAnswer');
+        const fourPicsSubmitBtn = document.getElementById('fourPicsSubmit');
+
 
         const scale = 20;
 
         const fullMessage = "Congratulations my dear!";
+        const newMessage = `My beautiful CPA❤,<br><br>Happy 3rd monthsary! 🎉 It's been three months since we've been together, and time seems to have flown by so fast. I just wanted to thank you for everything.<br><br>I'm sorry if I'm sometimes easily be sad🥺, but thank you for endlessly understanding me, especially when I'm gloomy. I really appreciate your effort and care when I am not okay❤. I will never forget our Legazpi trip. Even though I threw up during the trip 😅, I was so happy because I was with you. We made so many memories. A dream come true to walk at night with you, a very tiring day but all of a sudden it disppears and it is being filled with laughter and joy❤🌌, the whole day seems very perfect to me, thank you for everything baby❤. <br><br>I am greatful to have you in my life. Ive always thanks God that I have you, that will be always by my side no matter what. I am assuring you that I will always be better and my top priority is your happiness, your "Yes" is a treasure to me and I will keep you forever.❤<br><br>I also want you to know that I love you so much every day. ❤️ You're my constant and my everlasting magical journey ✨<br><br>Your engr,<br>Joshua`;
         let unlockedMessage = Array(fullMessage.length).fill('_ ');
 
         // Stages with unique challenges
@@ -235,33 +274,32 @@
                     { text: "I+L+O+V+E+Y+O+U=?", answer: "124" }
                 ]
             }, 
-            {
-                name: 'Puzzle of the Heart',
-                map: [
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-                ],
-                items: [],
-                enemies: [],
-                exit: { x: 15, y: 15 },
-                itemsRequired: 1,
-                challengeType: 'jigsaw',
-                puzzleSize: 4
-            }
+        {
+            name: '4 Pics 1 Word',
+            map: [
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            items: [],
+            enemies: [],
+            exit: { x: 15, y: 15 },
+            itemsRequired: 1,
+            challengeType: 'fourpics1word'
+        }
         ];
 
         let currentStage = 0;
@@ -294,7 +332,27 @@
 
 
         // Load initial stage
+        currentStage = 0;
         loadStage(currentStage);
+
+        // Add event listener for four pics submit button
+        fourPicsSubmitBtn.addEventListener('click', () => {
+            const answer = fourPicsAnswerInput.value.toLowerCase().trim();
+            if (answer === 'together') {
+                // Correct answer
+                items.forEach(item => item.solved = true);
+                collected = level.itemsRequired;
+                // Show scroll message
+                message.innerHTML = newMessage;
+                message.style.display = 'block';
+                restartBtn.style.display = 'block';
+                gameWon = true;
+                gameOver = true;
+            } else {
+                // Wrong answer, clear input
+                fourPicsAnswerInput.value = '';
+            }
+        });
 
         function loadDefaultPuzzleImage() {
             const img = new Image();
@@ -324,28 +382,28 @@
 
 
 
-        function initJigsawPuzzle() {
-            const puzzleSize = level.puzzleSize;
-            puzzlePieces = [];
-            puzzleOrder = [];
-            puzzleImagePieces = [];
+function initJigsawPuzzle() {
+    const puzzleSize = level.puzzleSize;
+    puzzlePieces = [];
+    puzzleOrder = [];
+    // puzzleImagePieces = [];  // Removed clearing to preserve loaded image pieces
 
-            // Create ordered puzzle pieces (numbers 0 to puzzleSize^2 -1)
-            for (let i = 0; i < puzzleSize * puzzleSize; i++) {
-                puzzlePieces.push(i);
-                puzzleOrder.push(i);
-            }
+    // Create ordered puzzle pieces (numbers 0 to puzzleSize^2 -1)
+    for (let i = 0; i < puzzleSize * puzzleSize; i++) {
+        puzzlePieces.push(i);
+        puzzleOrder.push(i);
+    }
 
-            // Shuffle puzzlePieces array to scramble pieces
-            for (let i = puzzlePieces.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [puzzlePieces[i], puzzlePieces[j]] = [puzzlePieces[j], puzzlePieces[i]];
-            }
+    // Shuffle puzzlePieces array to scramble pieces
+    for (let i = puzzlePieces.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [puzzlePieces[i], puzzlePieces[j]] = [puzzlePieces[j], puzzlePieces[i]];
+    }
 
-            puzzleCursor = { x: 0, y: 0 };
-            puzzleSelected = null;
-            puzzleSolved = false;
-        }
+    puzzleCursor = { x: 0, y: 0 };
+    puzzleSelected = null;
+    puzzleSolved = false;
+}
 
         function drawJigsawPuzzle() {
             const puzzleSize = level.puzzleSize;
@@ -455,6 +513,14 @@
                         loadDefaultPuzzleImage();
                     }
 
+                    if (level.challengeType === 'fourpics1word') {
+                        fourPicsDiv.style.display = 'block';
+                        canvas.style.display = 'none';
+                    } else {
+                        fourPicsDiv.style.display = 'none';
+                        canvas.style.display = 'block';
+                    }
+
                     status.textContent = `Stage: ${currentStage + 1}/4 | Collected: 0/${level.itemsRequired} | Lives: ${lives} | Unlocked Message: ${unlockedMessage.join('')}`;
                 }
 
@@ -486,6 +552,10 @@
             try {
                 if (level.challengeType === 'jigsaw') {
                     drawJigsawPuzzle();
+                    return;
+                }
+
+                if (level.challengeType === 'fourpics1word') {
                     return;
                 }
 
@@ -717,7 +787,7 @@
                     });
                 }
 
-                if (collected >= level.itemsRequired && Math.abs(player.x - exit.x) < 0.4 && Math.abs(player.y - exit.y) < 0.4) {
+                if (collected >= level.itemsRequired && (level.challengeType === 'fourpics1word' || (Math.abs(player.x - exit.x) < 0.4 && Math.abs(player.y - exit.y) < 0.4))) {
                     // Unlock letter for completed stage
                     unlockedMessage[currentStage] = fullMessage[currentStage] + ' ';
                     if (currentStage < stages.length - 1) {
@@ -912,7 +982,7 @@
                 }
 
                 // Show the message to girlfriend
-                message.textContent = "Happy 3rd Monthsary, my love! Every day with you is a blessing. I love you more than words can say.";
+                message.innerHTML = newMessage;
                 message.style.display = 'block';
                 restartBtn.style.display = 'block';
             }
