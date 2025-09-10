@@ -8,7 +8,1079 @@
     <style>
         body {
             font-family: monospace;
+            background-color: #1a1<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enchanted Forest Adventure</title>
+    <link href="./dist/output.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: monospace;
             background-color: #1a1a2e;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            border: 2px solid #0f3460;
+            background-color: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 5px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        #status {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        #instructions {
+            text-align: center;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            max-width: 600px;
+        }
+        #message {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #F5F5DC; /* Parchment color */
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.5em;
+            border: 5px solid #8B4513; /* Brown border */
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            font-family: 'Times New Roman', serif;
+        }
+        #restart {
+            display: none;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #228B22;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #restart:hover {
+            background-color: #006400;
+        }
+        #riddle {
+            display: none;
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2em;
+            max-width: 400px;
+        }
+        #riddle input {
+            width: 100%;
+            margin-top: 10px;
+            padding: 5px;
+            font-size: 1em;
+        }
+        #answered {
+            background-color: #FFD700;
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-4xl font-bold text-center mb-4 text-green-400">Enchanted Forest Adventure</h1>
+    <p id="instructions">Embark on a magical journey! Each stage is a unique challenge – mazes, riddles, equations, and puzzles await. Solve them to unlock letters of my message. 
+    <p id="controls" style="text-align: center; font-size: 0.9em; max-width: 600px; margin-top: 0; margin-bottom: 10px; color: #FFD700;">
+        Controls: Use <strong>Arrow Keys</strong> to move the character. Press <strong>Enter</strong> to interact with objects or pillars. On mobile devices, use the on-screen buttons to navigate and interact.
+    </p>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="320" height="320"></canvas>
+        <div id="fourPicsOneWord" style="display:none; margin-top: 20px; text-align: center;">
+            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;">
+                <img src="3.png" alt="Pic 1" width="70" height="70" style="border-radius: 10px; box-shadow: 0 0 10px #FFD700;">
+                <img src="hands.png" alt="Pic 2" width="70" height="70" style="border-radius: 10px; box-shadow: 0 0 10px #FFD700;">
+                <img src="lock.png" alt="Pic 3" width="70" height="70" style="border-radius: 10px; box-shadow: 0 0 10px #FFD700;">
+                <img src="salt.webp" alt="Pic 4" width="70" height="70" style="border-radius: 10px; box-shadow: 0 0 10px #FFD700;">
+            </div>
+            <input type="text" id="fourPicsAnswer" placeholder="Enter your answer here" style="font-size: 1.2em; padding: 5px; width: 250px; border-radius: 5px; border: 2px solid #FFD700; text-align: center;">
+            <br>
+            <button id="fourPicsSubmit" style="margin-top: 10px; padding: 8px 20px; font-size: 1.1em; background-color: #228B22; color: white; border: none; border-radius: 5px; cursor: pointer;">Submit</button>
+        </div>
+        <!-- Mobile Controls -->
+        <div id="mobileControls" style="display: none; margin-top: 20px; text-align: center;">
+            <div style="display: inline-block;">
+                <button id="upBtn" style="width: 50px; height: 50px; margin: 5px; background-color: #228B22; color: white; border: none; border-radius: 5px; font-size: 20px;">↑</button>
+                <br>
+                <button id="leftBtn" style="width: 50px; height: 50px; margin: 5px; background-color: #228B22; color: white; border: none; border-radius: 5px; font-size: 20px;">←</button>
+                <button id="downBtn" style="width: 50px; height: 50px; margin: 5px; background-color: #228B22; color: white; border: none; border-radius: 5px; font-size: 20px;">↓</button>
+                <button id="rightBtn" style="width: 50px; height: 50px; margin: 5px; background-color: #228B22; color: white; border: none; border-radius: 5px; font-size: 20px;">→</button>
+                <br>
+                <button id="enterBtn" style="width: 100px; height: 50px; margin: 5px; background-color: #FFD700; color: black; border: none; border-radius: 5px; font-size: 16px;">Enter</button>
+            </div>
+        </div>
+    </div>
+    <p id="status">Stage: 1/4 | Collected: 0/3 | Lives: 3 | Unlocked Message: _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</p>
+    <button id="restart" onclick="restartGame()">Restart Game</button>
+
+    <div id="riddle">
+        <p id="riddleText">Solve this riddle to unlock a ring!</p>
+        <input type="text" id="riddleInput" placeholder="Your answer here">
+        <button id="answered">Submit</button>
+    </div>
+
+
+
+
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const status = document.getElementById('status');
+        let message = document.getElementById('message');
+        if (!message) {
+            message = document.createElement('div');
+            message.id = 'message';
+            message.style.display = 'none';
+            message.style.position = 'absolute';
+            message.style.top = '50%';
+            message.style.left = '50%';
+            message.style.transform = 'translate(-50%, -50%)';
+            message.style.backgroundColor = '#F5F5DC';
+            message.style.color = '#000';
+            message.style.padding = '20px';
+            message.style.borderRadius = '10px';
+            message.style.textAlign = 'center';
+            message.style.fontSize = '1.5em';
+            message.style.border = '5px solid #8B4513';
+            message.style.boxShadow = '0 0 20px rgba(0,0,0,0.5)';
+            message.style.fontFamily = "'Times New Roman', serif";
+            document.body.appendChild(message);
+        }
+        const restartBtn = document.getElementById('restart');
+        const riddleDiv = document.getElementById('riddle');
+        const riddleText = document.getElementById('riddleText');
+        const riddleInput = document.getElementById('riddleInput');
+        const answeredBtn = document.getElementById('answered');
+
+        const fourPicsDiv = document.getElementById('fourPicsOneWord');
+        const fourPicsAnswerInput = document.getElementById('fourPicsAnswer');
+        const fourPicsSubmitBtn = document.getElementById('fourPicsSubmit');
+
+
+        const scale = 20;
+
+        const fullMessage = "Congratulations my dear!";
+        const newMessage = `My beautiful CPA❤,<br><br>Happy 3rd monthsary! 🎉 It's been three months since we've been together, and time seems to have flown by so fast. I just wanted to thank you for everything.<br><br>I'm sorry if I'm sometimes easily be sad🥺, but thank you for endlessly understanding me, especially when I'm gloomy. I really appreciate your effort and care when I am not okay❤. I will never forget our Legazpi trip. Even though I threw up during the trip 😅, I was so happy because I was with you. We made so many memories. A dream come true to walk at night with you, a very tiring day but all of a sudden it disppears and it is being filled with laughter and joy❤🌌, the whole day seems very perfect to me, thank you for everything baby❤. <br><br>I am greatful to have you in my life. Ive always thanks God that I have you, that will be always by my side no matter what. I am assuring you that I will always be better and my top priority is your happiness, your "Yes" is a treasure to me and I will keep you forever.❤<br><br>I also want you to know that I love you so much every day. ❤️ You're my constant and my everlasting magical journey ✨<br><br>Your engr,<br>Joshua`;
+        let unlockedMessage = Array(fullMessage.length).fill('_ ');
+
+        // Stages with unique challenges
+        const stages = [
+            {
+                name: 'Twilight Grove',
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,1,1,0,1,0,1,0,1,0,1,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,1,1,1,1,0,1,0,1,1,1,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,1,1,0,1,0,1,0,1,0,1,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                items: [],
+                enemies: [{ x: 5, y: 4 }, { x: 10, y: 6 }],
+                exit: { x: 14, y: 10 },
+                itemsRequired: 3,
+                challengeType: 'maze' // Standard maze
+            },
+            {
+                name: 'Mystic Realm of Riddles',
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1],
+                    [1,0,1,0,1,0,0,0,0,1,1,1,1,0,0,1],
+                    [1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1],
+                    [1,0,1,1,0,1,1,0,0,1,0,1,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,1,0,0,0,0,0,1,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                items: [],
+                enemies: [{ x: 2, y: 5 }, { x: 12, y: 7 }, { x: 8, y: 10 }],
+                exit: { x: 9, y: 14 },
+                itemsRequired: 4,
+                challengeType: 'riddle',
+                riddles: [
+                    { text: "I'm a spark upon the lips, Gentle fire in fingertips. What am I?", answer: "kiss" },
+                    { text: "I'm a spark you cannot see, yet I light your world endlessly. What am I?", answer: "love" },
+                    { text: "I hold you close without a word, My warmth is felt, my sound unheard. What am I?", answer: "hug" },
+                    { text: "I'm a secret written in 6 letters, gentle as whispers, strong as forever. Not the sun, But I warm your cold, not a jewel, yet worth more than a gold, call me softly my ears will blush. Who I am?", answer: "Joshua" }
+                ],
+                lightningDoors: [
+                    { x: 4, y: 5, open: false, timer: 0, interval: 100 },
+                    { x: 7, y: 8, open: false, timer: 0, interval: 150 }
+                ],
+                fallingRocks: [
+                    { x: 6, y: 0, active: false, timer: 0, interval: 200 }
+                ]
+            },
+            {
+                name: 'Ancient Equations Grove',
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,1,1,0,0,0,1,0,1,1,1,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,1,1,0,0,0,0,0,1,1,1,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                items: [],
+                enemies: [], // No enemies, focus on equations
+                traps: [{ x: 5, y: 5 }, { x: 10, y: 10 }, { x: 7, y: 12 }],
+                exit: { x: 14, y: 14 },
+                itemsRequired: 5,
+                challengeType: 'equation',
+                equations: [
+                    { text: "The sum of my hour digits is 2, and both digits are the same. The minute shows the same pattern. What time it is?", answer: "11:11" },
+                    { text: "The day is equal to the fourth power of 2, the month is equal to the factorial of 3, the year is equal to 2000 plus the factorial of 4. Where are we on that date? ", answer: "Inarihan" },
+                    { text: "If a cube has 6 faces, 3*3+2=?, and 2000+5*5=? What date does it form?", answer: "June 11, 2025" },
+                    { text: "2(5x-7)+4=20 x = ?", answer: "3" },
+                    { text: "I+L+O+V+E+Y+O+U=?", answer: "124" }
+                ]
+            }, 
+        {
+            name: '4 Pics 1 Word',
+            map: [
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            items: [],
+            enemies: [],
+            exit: { x: 15, y: 15 },
+            itemsRequired: 1,
+            challengeType: 'fourpics1word'
+        }
+        ];
+
+        let currentStage = 0;
+        let player = { x: 1, y: 1, targetX: 1, targetY: 1, animating: false, speed: 0.3 };
+        let level = stages[currentStage];
+        let items = level.items.slice();
+        let enemies = level.enemies.slice();
+        let exit = level.exit;
+        let lives = 3;
+        let collected = 0;
+        let gameOver = false;
+        let gameWon = false;
+        let gameStarted = true;
+        let time = 0;
+        let animFrame = 0;
+        let enemyMoveTimer = 0;
+        let currentRiddle = null;
+        let currentEquation = null;
+
+        // Variables for jigsaw puzzle stage
+        let puzzlePieces = [];
+        let puzzleOrder = [];
+        let puzzleCursor = { x: 0, y: 0 };
+        let puzzleSelected = null;
+        let puzzleSolved = false;
+        let uploadedImage = null;
+        let puzzleImagePieces = [];
+        const defaultImagesrc = "3.png";
+
+
+
+        // Add event listener for four pics submit button
+        fourPicsSubmitBtn.addEventListener('click', () => {
+            const answer = fourPicsAnswerInput.value.toLowerCase().trim();
+            if (answer === 'together') {
+                // Correct answer
+                items.forEach(item => item.solved = true);
+                collected = level.itemsRequired;
+                // Show scroll message
+                message.innerHTML = newMessage;
+                message.style.display = 'block';
+                restartBtn.style.display = 'block';
+                gameWon = true;
+                gameOver = true;
+            } else {
+                // Wrong answer, clear input
+                fourPicsAnswerInput.value = '';
+            }
+        });
+
+        // Mobile controls
+        const mobileControls = document.getElementById('mobileControls');
+
+        // Load initial stage
+        currentStage = 0;
+        loadStage(currentStage);
+        const upBtn = document.getElementById('upBtn');
+        const downBtn = document.getElementById('downBtn');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+        const enterBtn = document.getElementById('enterBtn');
+
+        // Function to simulate key press
+        function simulateKey(key) {
+            const event = new KeyboardEvent('keydown', { key: key });
+            document.dispatchEvent(event);
+        }
+
+        // Add event listeners for mobile buttons
+        upBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            simulateKey('ArrowUp');
+        });
+        downBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            simulateKey('ArrowDown');
+        });
+        leftBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            simulateKey('ArrowLeft');
+        });
+        rightBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            simulateKey('ArrowRight');
+        });
+        enterBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            simulateKey('Enter');
+        });
+
+        function loadDefaultPuzzleImage() {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                uploadedImage = img;
+                // Slice the image into puzzle pieces
+                const puzzleSize = level.puzzleSize;
+                const pieceWidth = img.naturalWidth / puzzleSize;
+                const pieceHeight = img.naturalHeight / puzzleSize;
+                puzzleImagePieces = [];
+                for (let i = 0; i < puzzleSize * puzzleSize; i++) {
+                    const canvasPiece = document.createElement('canvas');
+                    canvasPiece.width = pieceWidth;
+                    canvasPiece.height = pieceHeight;
+                    const ctxPiece = canvasPiece.getContext('2d');
+                    const sx = (i % puzzleSize) * pieceWidth;
+                    const sy = Math.floor(i / puzzleSize) * pieceHeight;
+                    ctxPiece.drawImage(img, sx, sy, pieceWidth, pieceHeight, 0, 0, pieceWidth, pieceHeight);
+                    puzzleImagePieces.push(canvasPiece);
+                }
+                initJigsawPuzzle();
+            };
+            img.src = defaultImageUrl;
+        }
+
+
+
+
+function initJigsawPuzzle() {
+    const puzzleSize = level.puzzleSize;
+    puzzlePieces = [];
+    puzzleOrder = [];
+    // puzzleImagePieces = [];  // Removed clearing to preserve loaded image pieces
+
+    // Create ordered puzzle pieces (numbers 0 to puzzleSize^2 -1)
+    for (let i = 0; i < puzzleSize * puzzleSize; i++) {
+        puzzlePieces.push(i);
+        puzzleOrder.push(i);
+    }
+
+    // Shuffle puzzlePieces array to scramble pieces
+    for (let i = puzzlePieces.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [puzzlePieces[i], puzzlePieces[j]] = [puzzlePieces[j], puzzlePieces[i]];
+    }
+
+    puzzleCursor = { x: 0, y: 0 };
+    puzzleSelected = null;
+    puzzleSolved = false;
+}
+
+        function drawJigsawPuzzle() {
+            const puzzleSize = level.puzzleSize;
+            const pieceSize = scale * 3; // bigger pieces for visibility
+            const offsetX = (canvas.width - pieceSize * puzzleSize) / 2;
+            const offsetY = (canvas.height - pieceSize * puzzleSize) / 2;
+
+            // Draw background
+            ctx.fillStyle = '#222';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw pieces
+            for (let i = 0; i < puzzlePieces.length; i++) {
+                const pieceNum = puzzlePieces[i];
+                const drawX = offsetX + (i % puzzleSize) * pieceSize;
+                const drawY = offsetY + Math.floor(i / puzzleSize) * pieceSize;
+
+                // Draw image piece if available
+                if (puzzleImagePieces[pieceNum]) {
+                    ctx.drawImage(puzzleImagePieces[pieceNum], drawX, drawY, pieceSize - 2, pieceSize - 2);
+                } else {
+                    // Fallback to colored block if image not loaded
+                    ctx.fillStyle = '#FFB6C1'; // pinkish for love theme
+                    ctx.fillRect(drawX, drawY, pieceSize - 2, pieceSize - 2);
+
+                    // Draw piece number (for demo)
+                    ctx.fillStyle = '#000';
+                    ctx.font = 'bold 24px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(pieceNum + 1, drawX + pieceSize / 2, drawY + pieceSize / 2);
+                }
+
+                // Highlight correct pieces in green
+                if (pieceNum === i) {
+                    ctx.strokeStyle = '#228B22';
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(drawX, drawY, pieceSize - 2, pieceSize - 2);
+                }
+            }
+
+            // Draw cursor
+            const cursorX = offsetX + puzzleCursor.x * pieceSize;
+            const cursorY = offsetY + puzzleCursor.y * pieceSize;
+            ctx.strokeStyle = puzzleSelected === puzzleCursor.y * puzzleSize + puzzleCursor.x ? '#FFD700' : '#00FFFF';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(cursorX, cursorY, pieceSize - 2, pieceSize - 2);
+        }
+
+        function checkPuzzleSolved() {
+            for (let i = 0; i < puzzlePieces.length; i++) {
+                if (puzzlePieces[i] !== i) return false;
+            }
+            return true;
+        }
+
+        function loadStage(stageIndex) {
+            currentStage = stageIndex;
+            level = stages[stageIndex];
+            if (level.riddles) {
+                level.riddles = level.riddles.map(r => ({ ...r, solved: false }));
+            }
+
+            // Randomize item positions
+                    let openSpaces = [];
+                    for (let y = 0; y < level.map.length; y++) {
+                        for (let x = 0; x < level.map[y].length; x++) {
+                            if (level.map[y][x] === 0 && !(x === exit.x && y === exit.y) && !(x === 1 && y === 1)) { // Avoid exit and start
+                                openSpaces.push({ x, y });
+                            }
+                        }
+                    }
+                    // Shuffle openSpaces
+                    for (let i = openSpaces.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [openSpaces[i], openSpaces[j]] = [openSpaces[j], openSpaces[i]];
+                    }
+                    items = openSpaces.slice(0, level.itemsRequired).map(pos => ({ ...pos, solved: level.challengeType !== 'maze' ? false : undefined }));
+
+                    // For first stage, increase challenge
+                    if (stageIndex === 0) {
+                        level.itemsRequired = 5; // Increase required items
+                        enemies = [
+                            { x: 5, y: 4 }, { x: 10, y: 6 }, { x: 2, y: 8 }, { x: 12, y: 10 }, { x: 7, y: 12 } // More enemies
+                        ];
+                        items = openSpaces.slice(0, level.itemsRequired).map(pos => ({ ...pos, solved: level.challengeType !== 'maze' ? false : undefined }));
+                    } else {
+                        enemies = level.enemies.map(enemy => ({ ...enemy }));
+                    }
+
+                    exit = level.exit;
+                    player.x = 1;
+                    player.y = 1;
+                    player.targetX = 1;
+                    player.targetY = 1;
+                    player.animating = false;
+                    collected = 0;
+                    time = 0;
+                    animFrame = 0;
+                    enemyMoveTimer = 0;
+                    currentRiddle = null;
+                    currentEquation = null;
+                    riddleDiv.style.display = 'none';
+
+                    if (level.challengeType === 'jigsaw') {
+                        // Load default image from Imgur
+                        loadDefaultPuzzleImage();
+                    }
+
+                    if (level.challengeType === 'fourpics1word') {
+                        fourPicsDiv.style.display = 'block';
+                        canvas.style.display = 'none';
+                    } else {
+                        fourPicsDiv.style.display = 'none';
+                        canvas.style.display = 'block';
+                    }
+
+                    // Show mobile controls on touch devices for non-fourpics stages
+                    if (level.challengeType !== 'fourpics1word' && 'ontouchstart' in window) {
+                        mobileControls.style.display = 'block';
+                    } else {
+                        mobileControls.style.display = 'none';
+                    }
+
+                    status.textContent = `Stage: ${currentStage + 1}/4 | Collected: 0/${level.itemsRequired} | Lives: ${lives} | Unlocked Message: ${unlockedMessage.join('')}`;
+                }
+
+        function drawForestBackground(day) {
+            // Draw sky
+            ctx.fillStyle = day ? '#87CEEB' : '#191970';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ground
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+
+            // Draw trees
+            for (let i = 0; i < 10; i++) {
+                let x = (i * 32) + Math.sin(time * 0.01 + i) * 5;
+                let y = canvas.height - 60;
+                // Trunk
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(x, y, 8, 20);
+                // Leaves
+                ctx.fillStyle = '#006400';
+                ctx.beginPath();
+                ctx.arc(x + 4, y - 10, 15, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function draw() {
+            try {
+                if (level.challengeType === 'jigsaw') {
+                    drawJigsawPuzzle();
+                    return;
+                }
+
+                if (level.challengeType === 'fourpics1word') {
+                    return;
+                }
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                let day = Math.sin(time / 100) > 0;
+
+                drawForestBackground(day);
+
+                // Draw lightning doors and falling rocks for stage 2
+                if (currentStage === 1) {
+                    // Draw lightning doors
+                    level.lightningDoors.forEach(door => {
+                        ctx.fillStyle = door.open ? '#00FFFF' : '#00008B';
+                        ctx.fillRect(door.x * scale, door.y * scale, scale, scale * 2);
+                    });
+
+                    // Draw falling rocks
+                    level.fallingRocks.forEach(rock => {
+                        if (rock.active) {
+                            ctx.fillStyle = '#A9A9A9';
+                            ctx.beginPath();
+                            ctx.arc(rock.x * scale + 10, rock.y * scale + 10, 8, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    });
+                }
+
+                // Draw map
+                for (let y = 0; y < level.map.length; y++) {
+                    for (let x = 0; x < level.map[y].length; x++) {
+                        if (level.map[y][x] === 1) {
+                            ctx.fillStyle = '#000000';
+                            ctx.fillRect(x * scale - 1, y * scale - 1, scale + 2, scale + 2);
+                            ctx.fillStyle = '#A0522D';
+                            ctx.fillRect(x * scale, y * scale, scale, scale);
+                        } else if (x === exit.x && y === exit.y) {
+                            ctx.fillStyle = '#FFD700';
+                            ctx.beginPath();
+                            ctx.arc(x * scale + 10, y * scale + 10, 10, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.strokeStyle = '#FFFACD';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                // Draw items or pillars
+                items.forEach((item, index) => {
+                    if (level.challengeType === 'riddle' || level.challengeType === 'equation') {
+                        if (!item.solved) {
+                            ctx.fillStyle = '#FF6347'; // Pillar color for challenges
+                            ctx.fillRect(item.x * scale, item.y * scale, scale, scale);
+                            ctx.strokeStyle = '#FFD700';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(item.x * scale, item.y * scale, scale, scale);
+                        } else {
+                            ctx.fillStyle = '#FFD700'; // Solved ring
+                            ctx.beginPath();
+                            ctx.arc(item.x * scale + 10, item.y * scale + 10, 8, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    } else {
+                        ctx.fillStyle = '#FFD700';
+                        ctx.beginPath();
+                        ctx.arc(item.x * scale + 10, item.y * scale + 10, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#FFA500';
+                        ctx.beginPath();
+                        ctx.arc(item.x * scale + 10, item.y * scale + 10 + Math.sin(time * 0.1) * 2, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+
+        // Draw enemies (visible in all stages)
+                enemies.forEach(enemy => {
+                    let pulse = Math.sin(time * 0.2) * 0.5 + 2.5; // Increased base size
+                    ctx.fillStyle = '#DC143C';
+                    ctx.beginPath();
+                    ctx.arc(enemy.x * scale + 10, enemy.y * scale + 10, pulse, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Highlight with stroke
+                    ctx.strokeStyle = '#FFD700';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                });
+
+                // Draw traps for stage 3
+                if (currentStage === 2) {
+                    level.traps.forEach(trap => {
+                        ctx.fillStyle = '#FF0000';
+                        ctx.fillRect(trap.x * scale, trap.y * scale, scale, scale);
+                    });
+                }
+
+                player.x += (player.targetX - player.x) * player.speed;
+                player.y += (player.targetY - player.y) * player.speed;
+                if (Math.abs(player.x - player.targetX) < 0.01 && Math.abs(player.y - player.targetY) < 0.01) {
+                    player.x = player.targetX;
+                    player.y = player.targetY;
+                    player.animating = false;
+                }
+
+                // Draw girl character
+                let walkCycle = Math.sin(animFrame * 0.5) * 2;
+                ctx.fillStyle = '#FFB6C1'; // Skin
+                ctx.fillRect(player.x * scale + 2, player.y * scale + 2, scale - 4, scale - 4);
+                ctx.fillStyle = '#0000FF'; // Eyes
+                ctx.fillRect(player.x * scale + 4, player.y * scale + 4, 2, 2);
+                ctx.fillRect(player.x * scale + 12, player.y * scale + 4, 2, 2);
+                ctx.fillStyle = '#8B0000'; // Hair
+                ctx.fillRect(player.x * scale, player.y * scale - walkCycle, scale, 4);
+                ctx.fillRect(player.x * scale + 16 + walkCycle / 2, player.y * scale + 2, 2, 4);
+                ctx.fillRect(player.x * scale + walkCycle / 2, player.y * scale + 2, 2, 4);
+                ctx.fillStyle = '#00FF00'; // Dress
+                ctx.fillRect(player.x * scale + 4, player.y * scale + 12, 12, 8);
+                if (player.animating) {
+                    animFrame++;
+                }
+            } catch (e) {
+                // Drawing error
+            }
+        }
+
+        function moveEnemies() {
+            try {
+                enemyMoveTimer++;
+                if (enemyMoveTimer > 15) {
+                    enemies.forEach(enemy => {
+                        let moveDir = Math.random();
+                        let dir;
+                        if (moveDir < 0.25) dir = { x: enemy.x + 1, y: enemy.y };
+                        else if (moveDir < 0.5) dir = { x: enemy.x - 1, y: enemy.y };
+                        else if (moveDir < 0.75) dir = { x: enemy.x, y: enemy.y + 1 };
+                        else dir = { x: enemy.x, y: enemy.y - 1 };
+                        if (dir.x >= 0 && dir.x < level.map[0].length && dir.y >= 0 && dir.y < level.map.length && level.map[dir.y][dir.x] === 0) {
+                            enemy.x = dir.x;
+                            enemy.y = dir.y;
+                        }
+                    });
+                    enemyMoveTimer = 0;
+                }
+
+                // Update lightning doors and falling rocks for stage 2
+                if (currentStage === 1) {
+                    // Update lightning doors timers and toggle open state
+                    level.lightningDoors.forEach(door => {
+                        door.timer++;
+                        if (door.timer >= door.interval) {
+                            door.open = !door.open;
+                            door.timer = 0;
+                        }
+                    });
+
+                    // Update falling rocks timers and activate/deactivate
+                    level.fallingRocks.forEach(rock => {
+                        rock.timer++;
+                        if (rock.timer >= rock.interval) {
+                            rock.active = !rock.active;
+                            rock.timer = 0;
+                            if (rock.active) {
+                                rock.y = 0; // Reset to top
+                            }
+                        }
+                        if (rock.active) {
+                            rock.y++;
+                            if (rock.y > level.map.length) {
+                                rock.active = false;
+                                rock.y = 0;
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                // Enemy move error
+            }
+        }
+
+        function checkCollisions() {
+            try {
+                // Special handling for challenges
+                if (level.challengeType === 'riddle' || level.challengeType === 'equation' || level.challengeType === 'jigsaw') {
+                    items.forEach(item => {
+                        if (Math.abs(player.x - item.x) < 0.4 && Math.abs(player.y - item.y) < 0.4 && !item.solved && riddleDiv.style.display !== 'block') {
+                            if (level.challengeType === 'jigsaw') {
+                                // For jigsaw, puzzle is played on canvas
+                            } else {
+                // Trigger riddle or equation
+                if (riddleDiv.style.display === 'none') {
+                    currentRiddle = null;
+                    currentEquation = null;
+                if (level.challengeType === 'riddle') {
+                    // Select a riddle that is not yet solved
+                    let unsolvedRiddles = level.riddles.filter(r => !r.solved);
+                    if (unsolvedRiddles.length === 0) {
+                        // All riddles solved, do nothing or reset
+                        riddleDiv.style.display = 'none';
+                        return;
+                    }
+                    currentRiddle = unsolvedRiddles[Math.floor(Math.random() * unsolvedRiddles.length)];
+                    riddleText.textContent = currentRiddle.text;
+                } else if (level.challengeType === 'equation' || level.challengeType === 'problem solving') {
+                    // Select an equation that is not yet solved
+                    if (!level.equations.some(eq => !eq.solved)) {
+                        riddleDiv.style.display = 'none';
+                        return;
+                    }
+                    let unsolvedEquations = level.equations.filter(eq => !eq.solved);
+                    currentEquation = unsolvedEquations[Math.floor(Math.random() * unsolvedEquations.length)];
+                    riddleText.textContent = currentEquation.text;
+                }
+                riddleInput.value = '';
+                riddleDiv.style.display = 'block';
+                }
+                            }
+                        }
+                    });
+                } else {
+                    // Standard items
+                    items = items.filter(item => {
+                        if (Math.abs(player.x - item.x) < 0.4 && Math.abs(player.y - item.y) < 0.4) {
+                            collected++;
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
+                // Enemy collisions for all stages
+                enemies.forEach(enemy => {
+                    if (Math.abs(player.x - enemy.x) < 0.4 && Math.abs(player.y - enemy.y) < 0.4 && !player.animating) {
+                        lives--;
+                        player.x = 1; player.y = 1; player.targetX = 1; player.targetY = 1; player.animating = false;
+                    }
+                });
+
+                // Trap collisions for stage 3
+                if (currentStage === 2) {
+                    level.traps.forEach(trap => {
+                        if (Math.abs(player.x - trap.x) < 0.4 && Math.abs(player.y - trap.y) < 0.4 && !player.animating) {
+                            lives--;
+                            player.x = 1; player.y = 1; player.targetX = 1; player.targetY = 1; player.animating = false;
+                        }
+                    });
+                }
+
+                if (collected >= level.itemsRequired && (level.challengeType === 'fourpics1word' || (Math.abs(player.x - exit.x) < 0.4 && Math.abs(player.y - exit.y) < 0.4))) {
+                    // Unlock letter for completed stage
+                    unlockedMessage[currentStage] = fullMessage[currentStage] + ' ';
+                    if (currentStage < stages.length - 1) {
+                        currentStage++;
+                        loadStage(currentStage);
+                    } else {
+                        gameWon = true;
+                        gameOver = true;
+                        message.style.display = 'block';
+                        restartBtn.style.display = 'block';
+                    }
+                }
+
+                if (lives <= 0) {
+                    gameOver = true;
+                    restartBtn.style.display = 'block';
+                }
+            } catch (e) {
+                // Collision check error
+            }
+        }
+
+        // Handle riddle/equation submission
+            answeredBtn.addEventListener('click', () => {
+                let input = riddleInput.value.toLowerCase().trim();
+                let correct = false;
+                if (currentRiddle && input === currentRiddle.answer.toLowerCase()) {
+                    correct = true;
+                    currentRiddle.solved = true;
+                } else if (currentEquation && input === currentEquation.answer.toLowerCase()) {
+                    correct = true;
+                }
+
+            if (correct) {
+                // Mark item as solved and collect
+                items.forEach(item => {
+                    if (Math.abs(player.x - item.x) < 0.4 && Math.abs(player.y - item.y) < 0.4 && !item.solved) {
+                        item.solved = true;
+                        collected++;
+                    }
+                });
+                // Mark equation as solved
+                if (currentEquation) {
+                    let eq = level.equations.find(eq => eq.text === currentEquation.text);
+                    if (eq) eq.solved = true;
+                }
+            }
+            riddleDiv.style.display = 'none';
+            currentRiddle = null;
+            currentEquation = null;
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (gameOver || player.animating) return;
+
+            if (level.challengeType === 'jigsaw') {
+                // Jigsaw puzzle controls
+                if (e.key === 'ArrowUp') {
+                    puzzleCursor.y = (puzzleCursor.y - 1 + level.puzzleSize) % level.puzzleSize;
+                } else if (e.key === 'ArrowDown') {
+                    puzzleCursor.y = (puzzleCursor.y + 1) % level.puzzleSize;
+                } else if (e.key === 'ArrowLeft') {
+                    puzzleCursor.x = (puzzleCursor.x - 1 + level.puzzleSize) % level.puzzleSize;
+                } else if (e.key === 'ArrowRight') {
+                    puzzleCursor.x = (puzzleCursor.x + 1) % level.puzzleSize;
+                } else if (e.key === 'Enter') {
+                    const index = puzzleCursor.y * level.puzzleSize + puzzleCursor.x;
+                    if (puzzleSelected === null) {
+                        puzzleSelected = index; // select first piece
+                    } else if (puzzleSelected === index) {
+                        puzzleSelected = null; // deselect if same piece
+                    } else {
+                        // Swap pieces
+                        [puzzlePieces[puzzleSelected], puzzlePieces[index]] = [puzzlePieces[index], puzzlePieces[puzzleSelected]];
+                        puzzleSelected = null;
+
+                        if (checkPuzzleSolved()) {
+                            puzzleSolved = true;
+                            // Mark item as solved
+                            items.forEach(item => item.solved = true);
+                            collected = level.itemsRequired;
+                        }
+                    }
+                }
+                return;
+            }
+
+            let newX = player.targetX, newY = player.targetY;
+            if (e.key === 'ArrowUp') newY--;
+            else if (e.key === 'ArrowDown') newY++;
+            else if (e.key === 'ArrowLeft') newX--;
+            else if (e.key === 'ArrowRight') newX++;
+            else if (e.key === 'Enter') {
+                // Interact with nearby pillar (for challenges)
+                if (level.challengeType === 'riddle' || level.challengeType === 'equation') {
+                    items.forEach(item => {
+                        if (Math.abs(player.x - item.x) < 0.4 && Math.abs(player.y - item.y) < 0.4 && !item.solved) {
+                            // Trigger interaction (if not already showing)
+                    if (riddleDiv.style.display === 'none') {
+                        if (level.challengeType === 'riddle') {
+                            let unsolvedRiddles = level.riddles.filter(r => !r.solved);
+                            if (unsolvedRiddles.length === 0) {
+                                return;
+                            }
+                            currentRiddle = unsolvedRiddles[Math.floor(Math.random() * unsolvedRiddles.length)];
+                            riddleText.textContent = currentRiddle.text;
+                        } else if (level.challengeType === 'equation') {
+                            currentEquation = level.equations[Math.floor(Math.random() * level.equations.length)];
+                            riddleText.textContent = currentEquation.text;
+                        }
+                        riddleInput.value = '';
+                        riddleDiv.style.display = 'block';
+                    }
+                        }
+                    });
+                }
+                return;
+            }
+
+            if (newX >= 0 && newX < level.map[0].length && newY >= 0 && newY < level.map.length && level.map[newY][newX] === 0) {
+                player.targetX = newX;
+                player.targetY = newY;
+                player.animating = true;
+            }
+        });
+
+        function restartGame() {
+            currentStage = 0;
+            player = { x: 1, y: 1, targetX: 1, targetY: 1, animating: false, speed: 0.3 };
+            loadStage(currentStage);
+            level = stages[currentStage];
+            items = level.items.slice();
+            enemies = level.enemies.slice();
+            exit = level.exit;
+            lives = 3;
+            collected = 0;
+            gameOver = false;
+            gameWon = false;
+            gameStarted = true;
+            time = 0;
+            animFrame = 0;
+            enemyMoveTimer = 0;
+            unlockedMessage = Array(fullMessage.length).fill('_ ');
+            status.textContent = 'Stage: 1/4 | Collected: 0/3 | Lives: 3 | Unlocked Message: _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _';
+            message.style.display = 'none';
+            restartBtn.style.display = 'none';
+            riddleDiv.style.display = 'none';
+        }
+
+        function gameLoop() {
+            try {
+                if (gameStarted && !gameOver) {
+                    time++;
+                    moveEnemies();
+                    checkCollisions();
+                    draw();
+                    status.textContent = `Stage: ${currentStage + 1}/4 | Collected: ${collected}/${level.itemsRequired} | Lives: ${lives} | Unlocked Message: ${unlockedMessage.join('')}`;
+                } else if (gameOver && gameWon) {
+                    status.textContent = 'Congratulations! Full message unlocked.';
+                    draw();
+                } else if (gameOver && !gameWon) {
+                    status.textContent = 'Game Over! Solve challenges to progress.';
+                    draw();
+                }
+            } catch (e) {
+                // Game loop error
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+
+
+        // Override checkPuzzleSolved to show message when puzzle is solved
+        const originalCheckPuzzleSolved = checkPuzzleSolved;
+        checkPuzzleSolved = function() {
+            const solved = originalCheckPuzzleSolved();
+            if (solved) {
+                puzzleSolved = true;
+                // Mark item as solved
+                items.forEach(item => item.solved = true);
+                collected = level.itemsRequired;
+
+                // Show the full image on canvas when puzzle is solved and display message to girlfriend
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.imageSmoothingEnabled = false;
+                ctx.mozImageSmoothingEnabled = false;
+                ctx.webkitImageSmoothingEnabled = false;
+                ctx.msImageSmoothingEnabled = false;
+                if (uploadedImage) {
+                    ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+                }
+
+                // Show the message to girlfriend
+                message.innerHTML = newMessage;
+                message.style.display = 'block';
+                restartBtn.style.display = 'block';
+            }
+            return solved;
+        };
+
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>
+</content>
+</create_file>a2e;
             color: #fff;
             display: flex;
             flex-direction: column;
