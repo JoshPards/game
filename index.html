@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -105,7 +105,10 @@
 </head>
 <body>
     <h1 class="text-4xl font-bold text-center mb-4 text-green-400">Enchanted Forest Adventure</h1>
-    <p id="instructions">Embark on a magical journey! Each stage is a unique challenge – mazes, riddles, equations, and puzzles await. Solve them to unlock letters of my message. Use arrow keys to move, press E near pillars or to interact in puzzles!</p>
+    <p id="instructions">Embark on a magical journey! Each stage is a unique challenge – mazes, riddles, equations, and puzzles await. Solve them to unlock letters of my message. 
+    <p id="controls" style="text-align: center; font-size: 0.9em; max-width: 600px; margin-top: 0; margin-bottom: 10px; color: #FFD700;">
+        Controls: Use <strong>Arrow Keys</strong> or <strong>on-screen buttons</strong> to move the character. Press <strong>Enter</strong> or <strong>Enter button</strong> to interact with objects or pillars.
+    </p>
     <div class="game-container">
         <canvas id="gameCanvas" width="320" height="320"></canvas>
         <div id="fourPicsOneWord" style="display:none; margin-top: 20px; text-align: center;">
@@ -118,6 +121,18 @@
             <input type="text" id="fourPicsAnswer" placeholder="Enter your answer here" style="font-size: 1.2em; padding: 5px; width: 250px; border-radius: 5px; border: 2px solid #FFD700; text-align: center;">
             <br>
             <button id="fourPicsSubmit" style="margin-top: 10px; padding: 8px 20px; font-size: 1.1em; background-color: #228B22; color: white; border: none; border-radius: 5px; cursor: pointer;">Submit</button>
+        </div>
+        <!-- Mobile Controls -->
+        <div id="mobileControls" style="display: none; margin-top: 20px; text-align: center;">
+            <div style="display: inline-block;">
+                <button id="upBtn" style="width: 50px; height: 50px; margin: 5px; background-color: #228B22; color: white; border: none; border-radius: 5px; font-size: 20px;">↑</button>
+                <br>
+                <button id="leftBtn" style="width: 50px; height: 50px; margin: 5px; background-color: #228B22; color: white; border: none; border-radius: 5px; font-size: 20px;">←</button>
+                <button id="downBtn" style="width: 50px; height: 50px; margin: 5px; background-color: #228B22; color: white; border: none; border-radius: 5px; font-size: 20px;">↓</button>
+                <button id="rightBtn" style="width: 50px; height: 50px; margin: 5px; background-color: #228B22; color: white; border: none; border-radius: 5px; font-size: 20px;">→</button>
+                <br>
+                <button id="enterBtn" style="width: 100px; height: 50px; margin: 5px; background-color: #FFD700; color: black; border: none; border-radius: 5px; font-size: 16px;">Enter</button>
+            </div>
         </div>
     </div>
     <p id="status">Stage: 1/4 | Collected: 0/3 | Lives: 3 | Unlocked Message: _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</p>
@@ -263,6 +278,7 @@
                 ],
                 items: [],
                 enemies: [], // No enemies, focus on equations
+                traps: [{ x: 5, y: 5 }, { x: 10, y: 10 }, { x: 7, y: 12 }],
                 exit: { x: 14, y: 14 },
                 itemsRequired: 5,
                 challengeType: 'equation',
@@ -331,10 +347,6 @@
 
 
 
-        // Load initial stage
-        currentStage = 0;
-        loadStage(currentStage);
-
         // Add event listener for four pics submit button
         fourPicsSubmitBtn.addEventListener('click', () => {
             const answer = fourPicsAnswerInput.value.toLowerCase().trim();
@@ -352,6 +364,46 @@
                 // Wrong answer, clear input
                 fourPicsAnswerInput.value = '';
             }
+        });
+
+        // Mobile controls
+        const mobileControls = document.getElementById('mobileControls');
+
+        // Load initial stage
+        currentStage = 0;
+        loadStage(currentStage);
+        const upBtn = document.getElementById('upBtn');
+        const downBtn = document.getElementById('downBtn');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+        const enterBtn = document.getElementById('enterBtn');
+
+        // Function to simulate key press
+        function simulateKey(key) {
+            const event = new KeyboardEvent('keydown', { key: key });
+            document.dispatchEvent(event);
+        }
+
+        // Add event listeners for mobile buttons
+        upBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            simulateKey('ArrowUp');
+        });
+        downBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            simulateKey('ArrowDown');
+        });
+        leftBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            simulateKey('ArrowLeft');
+        });
+        rightBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            simulateKey('ArrowRight');
+        });
+        enterBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            simulateKey('Enter');
         });
 
         function loadDefaultPuzzleImage() {
@@ -521,6 +573,13 @@ function initJigsawPuzzle() {
                         canvas.style.display = 'block';
                     }
 
+                    // Show mobile controls for non-fourpics stages
+                    if (level.challengeType !== 'fourpics1word') {
+                        mobileControls.style.display = 'block';
+                    } else {
+                        mobileControls.style.display = 'none';
+                    }
+
                     status.textContent = `Stage: ${currentStage + 1}/4 | Collected: 0/${level.itemsRequired} | Lives: ${lives} | Unlocked Message: ${unlockedMessage.join('')}`;
                 }
 
@@ -535,15 +594,17 @@ function initJigsawPuzzle() {
 
             // Draw trees
             for (let i = 0; i < 10; i++) {
-                let x = (i * 32) + Math.sin(time * 0.01 + i) * 5;
+                let x = (i * 32) + Math.sin(time * 0.01 + i) * 3; // Reduced movement to prevent off-screen
                 let y = canvas.height - 60;
+                // Ensure tree stays within canvas bounds
+                x = Math.max(10, Math.min(canvas.width - 20, x)); // Keep trunk within bounds
                 // Trunk
                 ctx.fillStyle = '#8B4513';
                 ctx.fillRect(x, y, 8, 20);
-                // Leaves
+                // Leaves - ensure they don't go above canvas
                 ctx.fillStyle = '#006400';
                 ctx.beginPath();
-                ctx.arc(x + 4, y - 10, 15, 0, Math.PI * 2);
+                ctx.arc(x + 4, Math.max(15, y - 10), 12, 0, Math.PI * 2); // Smaller radius and clamped y position
                 ctx.fill();
             }
         }
@@ -588,9 +649,9 @@ function initJigsawPuzzle() {
                 for (let y = 0; y < level.map.length; y++) {
                     for (let x = 0; x < level.map[y].length; x++) {
                         if (level.map[y][x] === 1) {
-                            ctx.fillStyle = day ? '#228B22' : '#2F4F2F';
+                            ctx.fillStyle = '#000000';
                             ctx.fillRect(x * scale - 1, y * scale - 1, scale + 2, scale + 2);
-                            ctx.fillStyle = '#32CD32';
+                            ctx.fillStyle = '#A0522D';
                             ctx.fillRect(x * scale, y * scale, scale, scale);
                         } else if (x === exit.x && y === exit.y) {
                             ctx.fillStyle = '#FFD700';
@@ -631,14 +692,24 @@ function initJigsawPuzzle() {
                     }
                 });
 
-                // Draw enemies (only in maze stages)
-                if (level.challengeType === 'maze') {
-                    enemies.forEach(enemy => {
-                        let pulse = Math.sin(time * 0.2) * 0.5 + 1.5;
-                        ctx.fillStyle = '#DC143C';
-                        ctx.beginPath();
-                        ctx.arc(enemy.x * scale + 10, enemy.y * scale + 10, pulse, 0, Math.PI * 2);
-                        ctx.fill();
+        // Draw enemies (visible in all stages)
+                enemies.forEach(enemy => {
+                    let pulse = Math.sin(time * 0.2) * 0.5 + 2.5; // Increased base size
+                    ctx.fillStyle = '#DC143C';
+                    ctx.beginPath();
+                    ctx.arc(enemy.x * scale + 10, enemy.y * scale + 10, pulse, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Highlight with stroke
+                    ctx.strokeStyle = '#FFD700';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                });
+
+                // Draw traps for stage 3
+                if (currentStage === 2) {
+                    level.traps.forEach(trap => {
+                        ctx.fillStyle = '#FF0000';
+                        ctx.fillRect(trap.x * scale, trap.y * scale, scale, scale);
                     });
                 }
 
@@ -658,9 +729,9 @@ function initJigsawPuzzle() {
                 ctx.fillRect(player.x * scale + 4, player.y * scale + 4, 2, 2);
                 ctx.fillRect(player.x * scale + 12, player.y * scale + 4, 2, 2);
                 ctx.fillStyle = '#8B0000'; // Hair
-                ctx.fillRect(player.x * scale, player.y * scale - walkCycle, scale, 4);
-                ctx.fillRect(player.x * scale + 16 + walkCycle / 2, player.y * scale + 2, 2, 4);
-                ctx.fillRect(player.x * scale + walkCycle / 2, player.y * scale + 2, 2, 4);
+                ctx.fillRect(player.x * scale + 2, player.y * scale - walkCycle + 2, scale - 4, 4);
+                ctx.fillRect(player.x * scale + 14 + walkCycle / 2, player.y * scale + 2, 2, 4);
+                ctx.fillRect(player.x * scale + walkCycle / 2 + 2, player.y * scale + 2, 2, 4);
                 ctx.fillStyle = '#00FF00'; // Dress
                 ctx.fillRect(player.x * scale + 4, player.y * scale + 12, 12, 8);
                 if (player.animating) {
@@ -673,23 +744,21 @@ function initJigsawPuzzle() {
 
         function moveEnemies() {
             try {
-                if (level.challengeType === 'maze') {
-                    enemyMoveTimer++;
-                    if (enemyMoveTimer > 15) {
-                        enemies.forEach(enemy => {
-                            let moveDir = Math.random();
-                            let dir;
-                            if (moveDir < 0.25) dir = { x: enemy.x + 1, y: enemy.y };
-                            else if (moveDir < 0.5) dir = { x: enemy.x - 1, y: enemy.y };
-                            else if (moveDir < 0.75) dir = { x: enemy.x, y: enemy.y + 1 };
-                            else dir = { x: enemy.x, y: enemy.y - 1 };
-                            if (dir.x >= 0 && dir.x < level.map[0].length && dir.y >= 0 && dir.y < level.map.length && level.map[dir.y][dir.x] === 0) {
-                                enemy.x = dir.x;
-                                enemy.y = dir.y;
-                            }
-                        });
-                        enemyMoveTimer = 0;
-                    }
+                enemyMoveTimer++;
+                if (enemyMoveTimer > 15) {
+                    enemies.forEach(enemy => {
+                        let moveDir = Math.random();
+                        let dir;
+                        if (moveDir < 0.25) dir = { x: enemy.x + 1, y: enemy.y };
+                        else if (moveDir < 0.5) dir = { x: enemy.x - 1, y: enemy.y };
+                        else if (moveDir < 0.75) dir = { x: enemy.x, y: enemy.y + 1 };
+                        else dir = { x: enemy.x, y: enemy.y - 1 };
+                        if (dir.x >= 0 && dir.x < level.map[0].length && dir.y >= 0 && dir.y < level.map.length && level.map[dir.y][dir.x] === 0) {
+                            enemy.x = dir.x;
+                            enemy.y = dir.y;
+                        }
+                    });
+                    enemyMoveTimer = 0;
                 }
 
                 // Update lightning doors and falling rocks for stage 2
@@ -777,10 +846,18 @@ function initJigsawPuzzle() {
                     });
                 }
 
-                // Enemy collisions only for maze
-                if (level.challengeType === 'maze') {
-                    enemies.forEach(enemy => {
-                        if (Math.abs(player.x - enemy.x) < 0.4 && Math.abs(player.y - enemy.y) < 0.4 && !player.animating) {
+                // Enemy collisions for all stages
+                enemies.forEach(enemy => {
+                    if (Math.abs(player.x - enemy.x) < 0.4 && Math.abs(player.y - enemy.y) < 0.4 && !player.animating) {
+                        lives--;
+                        player.x = 1; player.y = 1; player.targetX = 1; player.targetY = 1; player.animating = false;
+                    }
+                });
+
+                // Trap collisions for stage 3
+                if (currentStage === 2) {
+                    level.traps.forEach(trap => {
+                        if (Math.abs(player.x - trap.x) < 0.4 && Math.abs(player.y - trap.y) < 0.4 && !player.animating) {
                             lives--;
                             player.x = 1; player.y = 1; player.targetX = 1; player.targetY = 1; player.animating = false;
                         }
@@ -853,7 +930,7 @@ function initJigsawPuzzle() {
                     puzzleCursor.x = (puzzleCursor.x - 1 + level.puzzleSize) % level.puzzleSize;
                 } else if (e.key === 'ArrowRight') {
                     puzzleCursor.x = (puzzleCursor.x + 1) % level.puzzleSize;
-                } else if (e.key === 'e' || e.key === 'E') {
+                } else if (e.key === 'Enter') {
                     const index = puzzleCursor.y * level.puzzleSize + puzzleCursor.x;
                     if (puzzleSelected === null) {
                         puzzleSelected = index; // select first piece
@@ -880,7 +957,7 @@ function initJigsawPuzzle() {
             else if (e.key === 'ArrowDown') newY++;
             else if (e.key === 'ArrowLeft') newX--;
             else if (e.key === 'ArrowRight') newX++;
-            else if (e.key === 'e' || e.key === 'E') {
+            else if (e.key === 'Enter') {
                 // Interact with nearby pillar (for challenges)
                 if (level.challengeType === 'riddle' || level.challengeType === 'equation') {
                     items.forEach(item => {
